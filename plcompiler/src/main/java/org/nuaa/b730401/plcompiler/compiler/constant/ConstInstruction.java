@@ -100,6 +100,6 @@ public class ConstInstruction {
     /**
      * 从命令行读入一个输入置于栈顶
      */
-    public static final int OPR_READ_LINE = 16;
+    public static final int OPR_READ = 16;
 
 }
