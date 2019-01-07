@@ -3,9 +3,7 @@ package org.nuaa.b730401.plcompiler.compiler;
 import org.nuaa.b730401.plcompiler.compiler.bean.ErrorBean;
 import org.nuaa.b730401.plcompiler.compiler.bean.ObjectCode;
 import org.nuaa.b730401.plcompiler.compiler.constant.ConstInstruction;
-import org.nuaa.b730401.plcompiler.compiler.exception.StackOverflowException;
 import org.nuaa.b730401.plcompiler.compiler.util.Procedure;
-import org.omg.CORBA.DATA_CONVERSION;
 
 import java.util.*;
 
@@ -67,10 +65,11 @@ public class Interpreter {
      */
     private StringBuilder outputBuffer;
 
-
-
     public Interpreter(List<ObjectCode> codeList) {
         dataStack = new ArrayList<>(DEFAULT_MAX_DATA_STACK_SIZE);
+        for (int i = 0; i <DEFAULT_MAX_DATA_STACK_SIZE; i++) {
+            dataStack.add(0);
+        }
         this.codeList = codeList;
         errorList = new LinkedList<>();
         outputBuffer = new StringBuilder();
@@ -81,10 +80,11 @@ public class Interpreter {
             return;
         }
         long beg = System.currentTimeMillis();
-        while (next < codeList.size() && (System.currentTimeMillis() - beg) / 1000 <= maxExecuteTime) {
+//         && (System.currentTimeMillis() - beg) / 1000 <= maxExecuteTime
+        do{
             ip = codeList.get(next++);
             instructionExecuteMap.get(ip.getOpcode()).apply();
-        }
+        } while (next != 0);
         executeTime = (System.currentTimeMillis() - beg) / 1000;
     }
 
