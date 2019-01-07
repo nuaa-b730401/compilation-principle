@@ -10,6 +10,7 @@ import lombok.Data;
 @Data
 public class ErrorBean {
     public static final int INVALID_OPCODE = 1;
+    public static final int RUNTIME_ERROR = 2;
 
     private int type;
     private int line;
