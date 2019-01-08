@@ -9,9 +9,9 @@ import java.util.List;
  * @Description:
  */
 public class ConstSymbol {
-    public static final int MYCONST = 1;
-    public static final int VAR = 2;
-    public static final int PROC = 3;
+//    public static final int MYCONST = 1;
+//    public static final int VAR = 2;
+//    public static final int PROC = 3;
 
 
 }

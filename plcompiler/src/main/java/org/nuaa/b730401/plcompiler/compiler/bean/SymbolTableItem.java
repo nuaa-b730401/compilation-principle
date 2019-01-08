@@ -22,6 +22,10 @@ public class SymbolTableItem {
     * */
     private int level;
     /*
+    * 表示常量或变量的值
+    * */
+    private int  value;
+    /*
     * 若常量时，则表示数值
     * 否则表示相对于所在嵌套过程基地址的地址
     * */
@@ -30,5 +34,15 @@ public class SymbolTableItem {
     * 编译时所占空间大小
     * */
     private int size;
+
+    public SymbolTableItem(int type, String name, int level, int value, int address, int size) {
+        this.type = type;
+        this.name = name;
+        this.level = level;
+        this.value = value;
+        this.address = address;
+        this.size = size;
+    }
+
 
 }

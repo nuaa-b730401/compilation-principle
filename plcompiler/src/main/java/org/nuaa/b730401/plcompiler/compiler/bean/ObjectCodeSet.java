@@ -1,5 +1,6 @@
 package org.nuaa.b730401.plcompiler.compiler.bean;
 
+import lombok.Data;
 import org.omg.CORBA.PUBLIC_MEMBER;
 
 import java.util.ArrayList;
@@ -10,6 +11,7 @@ import java.util.List;
  * @Date: 2019/1/7 20:17
  * @Description:
  */
+@Data
 public class ObjectCodeSet {
     private static final int ROWMAX = 10000;
 
@@ -24,21 +26,19 @@ public class ObjectCodeSet {
      * */
     private List<ObjectCode> objectCodeList;
 
-    public ObjectCodeSet(){
+    public ObjectCodeSet() {
         objectCodeList = new ArrayList<>();
-        objectCodeList.forEach(objectCode ->{
-            objectCode = new ObjectCode(-1,-1,-1);
+        objectCodeList.forEach(objectCode -> {
+            objectCode = new ObjectCode(-1, -1, -1);
         });
     }
 
     /*
-    * 填充目标代码
-    * */
-    public void recordObjectCode(int opcode,int deep,int offset){
-        objectCodeList.get(pos).setOpcode(opcode);
-        objectCodeList.get(pos).setDeep(deep);
-        objectCodeList.get(pos).setOffset(offset);
-        pos ++;
+     * 填充目标代码
+     * */
+    public void recordObjectCode(int opcode, int deep, int offset) {
+        objectCodeList.add(new ObjectCode(opcode, deep, offset));
+        pos++;
     }
 
 }

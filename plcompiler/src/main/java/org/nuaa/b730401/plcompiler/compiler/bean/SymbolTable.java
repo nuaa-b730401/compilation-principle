@@ -5,9 +5,10 @@ import lombok.Data;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.nuaa.b730401.plcompiler.compiler.constant.ConstSymbol.MYCONST;
-import static org.nuaa.b730401.plcompiler.compiler.constant.ConstSymbol.PROC;
-import static org.nuaa.b730401.plcompiler.compiler.constant.ConstSymbol.VAR;
+import static org.nuaa.b730401.plcompiler.compiler.constant.ConstWords.CON;
+import static org.nuaa.b730401.plcompiler.compiler.constant.ConstWords.PROC;
+import static org.nuaa.b730401.plcompiler.compiler.constant.ConstWords.VAR;
+
 
 /**
  * @Auther: cyw35
@@ -50,11 +51,8 @@ public class SymbolTable {
      * 记录常量
      * address: 变量的值
      * */
-    public void recordConst(String name, int level, int value) {
-        symbolTable.get(pos).setType(MYCONST);
-        symbolTable.get(pos).setName(name);
-        symbolTable.get(pos).setLevel(level);
-        symbolTable.get(pos).setAddress(value);
+    public void recordConst(String name, int level, int value,int address) {
+        symbolTable.add(new SymbolTableItem(CON,name,level,value,address,4));
         pos++;
     }
 
@@ -63,10 +61,7 @@ public class SymbolTable {
      * address:相对于该层次基地址的偏移量（对于基地址将在后面活动记录中详细说明）
      * */
     public void recordVar(String name, int level, int address) {
-        symbolTable.get(pos).setType(VAR);
-        symbolTable.get(pos).setName(name);
-        symbolTable.get(pos).setLevel(level);
-        symbolTable.get(pos).setAddress(address);
+        symbolTable.add(new SymbolTableItem(VAR,name,level,0,address,0));
         pos++;
     }
 
@@ -75,10 +70,7 @@ public class SymbolTable {
      * address: 过程处理语句(产生目标代码的操作)的开始地址
      * */
     public void recordProc(String name, int level, int address) {
-        symbolTable.get(pos).setType(PROC);
-        symbolTable.get(pos).setName(name);
-        symbolTable.get(pos).setLevel(level);
-        symbolTable.get(pos).setAddress(address);
+        symbolTable.add(new SymbolTableItem(PROC,name,level,0,address,4));
         pos++;
     }
 
@@ -87,7 +79,7 @@ public class SymbolTable {
      * */
     public boolean isDefineBefore(String name, int level) {
         for (int i = 0; i < pos; i++) {
-            if (symbolTable.get(i).equals(name) && symbolTable.get(i).getLevel() <= level) {
+            if (symbolTable.get(i).getName().equals(name) && symbolTable.get(i).getLevel() <= level) {
                 return true;
             }
         }
@@ -99,7 +91,7 @@ public class SymbolTable {
      * */
     public boolean isDefineNow(String name, int level) {
         for (int i = 0; i < pos; i++) {
-            if (symbolTable.get(i).equals(name) && symbolTable.get(i).getLevel() == level) {
+            if (symbolTable.get(i).getName().equals(name) && symbolTable.get(i).getLevel() == level) {
                 return true;
             }
         }
@@ -115,7 +107,12 @@ public class SymbolTable {
                 return i;
             }
         }
-        return -1;          //返回-1表示不存在该名字
+        //返回-1表示不存在该名字
+        return -1;
+    }
+
+    public SymbolTableItem getRow(int i){
+        return symbolTable.get(i);
     }
 
     /*
