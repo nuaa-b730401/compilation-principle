@@ -10,7 +10,7 @@ import java.util.*;
  * @Date: Created in 2019/1/7 9:52
  */
 public class ConstWords {
-    // key world
+    // key word
     /**
      * program
      */
