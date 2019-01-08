@@ -122,17 +122,17 @@ public class SyntaxAnalyzer {
             level--;    //还不清楚意思
         }
 //        这个size具体意义是啥
-        int size = symbolTable.getSymbolTable().get(curLevelProc).getSize();
+//        int size = symbolTable.getSymbolTable().get(curLevelProc).getSize();
         if (curTablePos > 0) {
-            for (int i = 0; i < size; i++) {
-                objectCodeSet.recordObjectCode(STO, 0, size + 3 - 1 - i);
+            for (int i = 0; i < symbolTable.getSymbolTable().get(curLevelProc).getSize(); i++) {
+                objectCodeSet.recordObjectCode(STO, 0, symbolTable.getSymbolTable().get(curLevelProc).getSize() + 3 - 1 - i);
             }
         }
         objectCodeSet.getObjectCodeList().get(tempPos).setOffset(objectCodeSet.getPos());
         objectCodeSet.recordObjectCode(INT, 0, address);
-        if (curTablePos < 0) {
+        if (curTablePos != 0) {
             //将本过程在符号表中的值设为本过程执行语句开始的位置
-            symbolTable.getRow(curLevelProc).setValue(objectCodeSet.getPos() - 1 - size);
+            symbolTable.getRow(curLevelProc).setValue(objectCodeSet.getPos() - 1 - symbolTable.getSymbolTable().get(curLevelProc).getSize());
         }
         body();
         objectCodeSet.recordObjectCode(OPR, 0, 0);
@@ -421,9 +421,9 @@ public class SyntaxAnalyzer {
                 objectCodeSet.getObjectCodeList().get(curCodePos).setOffset(objectCodeSet.getPos());
                 objectCodeSet.getObjectCodeList().get(curCodePos2).setOffset(objectCodeSet.getPos());
                 //如果 then 之后的语句会跟上;
-                if(lexList.get(pos).getId() == SEMIC){
-                    pos++;
-                }
+//                if(lexList.get(pos).getId() == SEMIC){
+//                    pos++;
+//                }
                 if (lexList.get(pos).getId() == ELSE) {
                     pos++;
                     statement();

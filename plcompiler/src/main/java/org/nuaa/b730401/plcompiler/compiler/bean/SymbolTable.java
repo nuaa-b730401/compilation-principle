@@ -56,7 +56,17 @@ public class SymbolTable {
      * address: 变量的值
      * */
     public void recordConst(String name, int level, int value, int address) {
-        symbolTable.add(new SymbolTableItem(CON, name, level, value, address, 4));
+        if (pos < len) {
+            symbolTable.get(pos).setType(CON);
+            symbolTable.get(pos).setAddress(address);
+            symbolTable.get(pos).setLevel(level);
+            symbolTable.get(pos).setValue(value);
+            symbolTable.get(pos).setName(name);
+            symbolTable.get(pos).setSize(4);
+        } else {
+            symbolTable.add(new SymbolTableItem(CON, name, level, value, address, 4));
+        }
+
         pos++;
         len++;
     }
@@ -66,7 +76,16 @@ public class SymbolTable {
      * address:相对于该层次基地址的偏移量（对于基地址将在后面活动记录中详细说明）
      * */
     public void recordVar(String name, int level, int address) {
-        symbolTable.add(new SymbolTableItem(VAR, name, level, 0, address, 0));
+        if (pos < len) {
+            symbolTable.get(pos).setType(VAR);
+            symbolTable.get(pos).setAddress(address);
+            symbolTable.get(pos).setLevel(level);
+            symbolTable.get(pos).setValue(0);
+            symbolTable.get(pos).setName(name);
+            symbolTable.get(pos).setSize(4);
+        } else {
+            symbolTable.add(new SymbolTableItem(VAR, name, level, 0, address, 0));
+        }
         pos++;
         len++;
     }
@@ -76,7 +95,16 @@ public class SymbolTable {
      * address: 过程处理语句(产生目标代码的操作)的开始地址
      * */
     public void recordProc(String name, int level, int address) {
-        symbolTable.add(new SymbolTableItem(PROC, name, level, 0, address, 4));
+        if (pos < len) {
+            symbolTable.get(pos).setType(PROC);
+            symbolTable.get(pos).setAddress(address);
+            symbolTable.get(pos).setLevel(level);
+            symbolTable.get(pos).setValue(0);
+            symbolTable.get(pos).setName(name);
+            symbolTable.get(pos).setSize(4);
+        } else {
+            symbolTable.add(new SymbolTableItem(PROC, name, level, 0, address, 0));
+        }
         pos++;
         len++;
     }
