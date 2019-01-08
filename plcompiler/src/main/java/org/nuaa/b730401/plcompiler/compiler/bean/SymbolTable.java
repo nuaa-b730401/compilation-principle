@@ -27,6 +27,10 @@ public class SymbolTable {
     private int pos = 0;
 
     /*
+     * 符号表已填充项数
+     * */
+    private int len = 0;
+    /*
      * 符号表
      * */
     private List<SymbolTableItem> symbolTable;
@@ -51,9 +55,10 @@ public class SymbolTable {
      * 记录常量
      * address: 变量的值
      * */
-    public void recordConst(String name, int level, int value,int address) {
-        symbolTable.add(new SymbolTableItem(CON,name,level,value,address,4));
+    public void recordConst(String name, int level, int value, int address) {
+        symbolTable.add(new SymbolTableItem(CON, name, level, value, address, 4));
         pos++;
+        len++;
     }
 
     /*
@@ -61,8 +66,9 @@ public class SymbolTable {
      * address:相对于该层次基地址的偏移量（对于基地址将在后面活动记录中详细说明）
      * */
     public void recordVar(String name, int level, int address) {
-        symbolTable.add(new SymbolTableItem(VAR,name,level,0,address,0));
+        symbolTable.add(new SymbolTableItem(VAR, name, level, 0, address, 0));
         pos++;
+        len++;
     }
 
     /*
@@ -70,15 +76,16 @@ public class SymbolTable {
      * address: 过程处理语句(产生目标代码的操作)的开始地址
      * */
     public void recordProc(String name, int level, int address) {
-        symbolTable.add(new SymbolTableItem(PROC,name,level,0,address,4));
+        symbolTable.add(new SymbolTableItem(PROC, name, level, 0, address, 4));
         pos++;
+        len++;
     }
 
     /*
      * 是否在lev层之前，包括lev层已被定义
      * */
     public boolean isDefineBefore(String name, int level) {
-        for (int i = 0; i < pos; i++) {
+        for (int i = 0; i < len; i++) {
             if (symbolTable.get(i).getName().equals(name) && symbolTable.get(i).getLevel() <= level) {
                 return true;
             }
@@ -90,7 +97,7 @@ public class SymbolTable {
      * 是否在lev层已被定义
      * */
     public boolean isDefineNow(String name, int level) {
-        for (int i = 0; i < pos; i++) {
+        for (int i = 0; i < len; i++) {
             if (symbolTable.get(i).getName().equals(name) && symbolTable.get(i).getLevel() == level) {
                 return true;
             }
@@ -102,7 +109,7 @@ public class SymbolTable {
      * 返回符号表中名字为name所在行的行号
      * */
     public int getNameRow(String name) {
-        for (int i = pos - 1; i >= 0; i--) {
+        for (int i = len - 1; i >= 0; i--) {
             if (symbolTable.get(i).getName().equals(name)) {
                 return i;
             }
@@ -111,15 +118,15 @@ public class SymbolTable {
         return -1;
     }
 
-    public SymbolTableItem getRow(int i){
+    public SymbolTableItem getRow(int i) {
         return symbolTable.get(i);
     }
 
     /*
-    * 返回本层的过程在符号表中的位置
-    * */
+     * 返回本层的过程在符号表中的位置
+     * */
     public int getLevelProc(int level) {
-        for (int i = pos - 1; i >= 0; i--) {
+        for (int i = len - 1; i >= 0; i--) {
             if (symbolTable.get(i).getType() == PROC) {
                 return i;
             }

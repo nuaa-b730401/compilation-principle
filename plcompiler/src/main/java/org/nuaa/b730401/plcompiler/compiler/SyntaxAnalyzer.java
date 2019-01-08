@@ -470,7 +470,6 @@ public class SyntaxAnalyzer {
                     return;
                 }
                 pos++;
-                // TODO: 2019/1/8 这个左括号好像不是必须的,后期调正
                 if (lexList.get(pos).getId() == LBR) {
                     pos++;
                     if (lexList.get(pos).getId() == RBR) {
