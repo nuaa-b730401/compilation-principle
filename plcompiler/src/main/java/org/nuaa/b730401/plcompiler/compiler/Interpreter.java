@@ -61,6 +61,11 @@ public class Interpreter {
     private List<ErrorBean> errorList;
 
     /**
+     * 结束状态
+     */
+    private boolean endStatus = false;
+
+    /**
      * 输出流
      */
     private StringBuilder outputBuffer;
@@ -72,20 +77,40 @@ public class Interpreter {
         }
         this.codeList = codeList;
         errorList = new LinkedList<>();
-        outputBuffer = new StringBuilder();
     }
 
-    public void interpreter() {
+    public void interpreter(int input, boolean inputStatus) {
+        outputBuffer = new StringBuilder();
         if (codeList == null || codeList.size() == 0) {
             return;
         }
+        // 记录开始时间
         long beg = System.currentTimeMillis();
-//         && (System.currentTimeMillis() - beg) / 1000 <= maxExecuteTime
         do{
             ip = codeList.get(next++);
-            instructionExecuteMap.get(ip.getOpcode()).apply();
-        } while (next != 0);
-        executeTime = (System.currentTimeMillis() - beg) / 1000;
+            // 需要读取数据，中断，等待输入
+            if (ip.getOpcode() == ConstInstruction.OPR && ip.getOffset() == ConstInstruction.OPR_READ) {
+                // 若输入缓冲区没有输入，中断等待输入
+                if (!inputStatus) {
+                    // 平衡指针
+                    next--;
+                    executeTime += (System.currentTimeMillis() - beg) / 1000;
+                    return;
+                }
+                // 有输入，执行读取操作
+                dataStack.set(top++, input);
+            } else {
+                // 否则继续执行
+                instructionExecuteMap.get(ip.getOpcode()).apply();
+            }
+        // 若还有指令或者没有超出死循环判断时间，则继续执行指令
+        } while (next != 0 && (System.currentTimeMillis() - beg) / 1000 <= maxExecuteTime);
+        // 超出死循环约束退出程序
+        if (next != 0) {
+            errorList.add(new ErrorBean(0, 0, "运行超时"));
+        }
+        endStatus = true;
+        executeTime += (System.currentTimeMillis() - beg) / 1000;
     }
 
     /**
@@ -176,7 +201,7 @@ public class Interpreter {
         });
 
         put(ConstInstruction.OPR_READ, () -> {
-            // TODO : read
+            // read 属于中断操作，不在该步进行处理，由中断程序控制
         });
     }};
 
@@ -241,6 +266,9 @@ public class Interpreter {
             oldBasePointer = dataStack.get(oldBasePointer + 1);
         }
         return oldBasePointer;
+    }
+    public boolean isEnd() {
+        return endStatus;
     }
 
     public long getExecuteTime() {

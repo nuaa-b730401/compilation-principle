@@ -1,5 +1,6 @@
 package org.nuaa.b730401.plcompiler;
 
+import org.nuaa.b730401.plcompiler.compiler.LexicalAnalyzer;
 import org.nuaa.b730401.plcompiler.compiler.SyntaxAnalyzer;
 
 /**
@@ -9,7 +10,9 @@ import org.nuaa.b730401.plcompiler.compiler.SyntaxAnalyzer;
  */
 public class SyntaxAnalyzerTest {
     public static void main(String[] args) {
-        SyntaxAnalyzer syntaxAnalyzer = new SyntaxAnalyzer();
+        LexicalAnalyzer lexicalAnalyzer = new LexicalAnalyzer("");
+        lexicalAnalyzer.analyze();
+        SyntaxAnalyzer syntaxAnalyzer = new SyntaxAnalyzer(lexicalAnalyzer);
         syntaxAnalyzer.analysis();
         syntaxAnalyzer.showObjectCode();
     }

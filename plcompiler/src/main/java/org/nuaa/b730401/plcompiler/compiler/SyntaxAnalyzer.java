@@ -55,23 +55,11 @@ public class SyntaxAnalyzer {
      * */
     private List<ErrorBean> errorList;
 
-    public SyntaxAnalyzer() {
-        LexicalAnalyzer lexicalAnalyzer = new LexicalAnalyzer("program p;\n" +
-                "\tconst c1:=1,c2:=2;\n" +
-                "\tvar v1,v2;\n" +
-                "\tbegin\n" +
-                "\t\tread(v1,v2);\n" +
-                "\t\tv1:=v1+c1;\n" +
-                "\t\tv2:=v2+c2;\n" +
-                "\t\twrite(v1,v2)\n" +
-                "\tend\n" +
-                "end\n");
-       lexicalAnalyzer.analyze();
-       lexList = lexicalAnalyzer.getLexTable();
+    public SyntaxAnalyzer(LexicalAnalyzer lexicalAnalyzer) {
+        lexList = lexicalAnalyzer.getLexTable();
         symbolTable = new SymbolTable();
         objectCodeSet = new ObjectCodeSet();
         errorList = new ArrayList<>();
-
     }
 
     /*
@@ -777,5 +765,17 @@ public class SyntaxAnalyzer {
             System.out.println(INSTRUCTION_SET.get(objectCode.getOpcode())
                     + " " + objectCode.getDeep() + " " + objectCode.getOffset());
         });
+    }
+
+    public SymbolTable getSymbolTable() {
+        return symbolTable;
+    }
+
+    public ObjectCodeSet getObjectCodeSet() {
+        return objectCodeSet;
+    }
+
+    public List<ErrorBean> getErrorList() {
+        return errorList;
     }
 }

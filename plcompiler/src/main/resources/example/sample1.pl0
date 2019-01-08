@@ -1,0 +1,5 @@
+program sample1;
+const hello:=1;
+begin
+    write(hello)
+end
