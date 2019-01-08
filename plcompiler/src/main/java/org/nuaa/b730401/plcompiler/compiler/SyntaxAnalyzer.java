@@ -549,7 +549,7 @@ public class SyntaxAnalyzer {
                                     //OPR 0 16	从命令行读入一个输入置于栈顶
                                     objectCodeSet.recordObjectCode(OPR, 0, 16);
                                     //STO L ，a 将数据栈栈顶的内容存入变量（相对地址为a，层次差为L）
-                                    objectCodeSet.recordObjectCode(OPR, level - temp.getLevel(), temp.getAddress());
+                                    objectCodeSet.recordObjectCode(STO, level - temp.getLevel(), temp.getAddress());
                                 } else {
                                     errorFlag = true;
                                     errorList.add(new ErrorBean(0, lexList.get(pos).getLine(), "类型不一致"));
