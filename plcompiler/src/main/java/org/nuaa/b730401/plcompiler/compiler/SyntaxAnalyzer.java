@@ -420,6 +420,10 @@ public class SyntaxAnalyzer {
                 objectCodeSet.recordObjectCode(JMP, 0, 0);
                 objectCodeSet.getObjectCodeList().get(curCodePos).setOffset(objectCodeSet.getPos());
                 objectCodeSet.getObjectCodeList().get(curCodePos2).setOffset(objectCodeSet.getPos());
+                //如果 then 之后的语句会跟上;
+                if(lexList.get(pos).getId() == SEMIC){
+                    pos++;
+                }
                 if (lexList.get(pos).getId() == ELSE) {
                     pos++;
                     statement();
@@ -524,7 +528,7 @@ public class SyntaxAnalyzer {
                             //OPR 0 16	从命令行读入一个输入置于栈顶
                             objectCodeSet.recordObjectCode(OPR, 0, 16);
                             //STO L ，a 将数据栈栈顶的内容存入变量（相对地址为a，层次差为L）
-                            objectCodeSet.recordObjectCode(OPR, level - temp.getLevel(), temp.getAddress());
+                            objectCodeSet.recordObjectCode(STO, level - temp.getLevel(), temp.getAddress());
                         } else {
                             errorFlag = true;
                             errorList.add(new ErrorBean(0, lexList.get(pos).getLine(), "类型不一致"));
@@ -604,7 +608,7 @@ public class SyntaxAnalyzer {
             }
         } else {
             errorFlag = true;
-            errorList.add(new ErrorBean(0, lexList.get(pos).getLine(), "标识符不合法"));
+            errorList.add(new ErrorBean(0, lexList.get(pos).getLine(), "statement处标识符不合法"));
             return;
         }
     }
@@ -654,7 +658,7 @@ public class SyntaxAnalyzer {
             pos++;
         }
         term();
-        if (lexList.get(pos).getId() == SUB) {
+        if (tempId == SUB) {
             //  OPR 0 1	栈顶元素取反
             objectCodeSet.recordObjectCode(OPR, 0, 1);
         }
@@ -698,6 +702,7 @@ public class SyntaxAnalyzer {
         if (lexList.get(pos).getId() == CONST) {
             //数字的话,取常量放入数据栈栈顶
             objectCodeSet.recordObjectCode(LIT, 0, Integer.parseInt(lexList.get(pos).getValue()));
+            pos++;
         } else if (lexList.get(pos).getId() == LBR) {
             pos++;
             exp();
@@ -732,7 +737,7 @@ public class SyntaxAnalyzer {
             pos++;
         } else {
             errorFlag = true;
-            errorList.add(new ErrorBean(0, lexList.get(pos).getLine(), "标识符不合法"));
+            errorList.add(new ErrorBean(0, lexList.get(pos).getLine(), "factor处标识符不合法"));
             return;
         }
     }
