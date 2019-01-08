@@ -1,7 +1,9 @@
 package org.nuaa.b730401.plcompiler.compiler.constant;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @Author: ToMax
@@ -31,6 +33,19 @@ public class ConstInstruction {
         add("JPC");
         add("RED");
         add("WRT");
+    }};
+
+    public static final Map<String, Integer> INSTRUCTION_MAP = new HashMap<String, Integer>(){{
+        put("LIT", LIT);
+        put("OPR", OPR);
+        put("LOD", LOD);
+        put("STO", STO);
+        put("CAL", CAL);
+        put("INT", INT);
+        put("JMP", JMP);
+        put("JPC", JPC);
+        put("RED", RED);
+        put("WRT", WRT);
     }};
 
     /**
