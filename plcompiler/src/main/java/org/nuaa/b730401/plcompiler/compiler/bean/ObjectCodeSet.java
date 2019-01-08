@@ -40,5 +40,4 @@ public class ObjectCodeSet {
         objectCodeList.add(new ObjectCode(opcode, deep, offset));
         pos++;
     }
-
 }

@@ -5,11 +5,14 @@ import org.nuaa.b730401.plcompiler.compiler.LexicalAnalyzer;
 import org.nuaa.b730401.plcompiler.compiler.SyntaxAnalyzer;
 import org.nuaa.b730401.plcompiler.compiler.bean.ErrorBean;
 import org.nuaa.b730401.plcompiler.compiler.bean.ObjectCode;
+import org.nuaa.b730401.plcompiler.entity.ObjectCodeView;
 import org.nuaa.b730401.plcompiler.entity.Response;
+import org.nuaa.b730401.plcompiler.entity.RunResultEntity;
 import org.nuaa.b730401.plcompiler.sevice.CodeService;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpSession;
+import java.util.stream.Collectors;
 
 /**
  * @Author: ToMax
@@ -20,6 +23,8 @@ import javax.servlet.http.HttpSession;
 public class CodeServiceImpl implements CodeService{
     @Override
     public Response compile(String sourceCode, HttpSession session) {
+        // 新的编译清除之前缓存
+        clearSession(session);
         // 补换行
         sourceCode += "\n";
         // 词法分析
@@ -46,16 +51,40 @@ public class CodeServiceImpl implements CodeService{
         setLexToSession(lexicalAnalyzer, session);
         setSyntaxToSession(syntaxAnalyzer, session);
         // 返回目标码
-        return new Response<ObjectCode>(
+        return new Response<ObjectCodeView>(
                 Response.COMPILE_SUCCESS_CODE,
                 "编译成功",
-                syntaxAnalyzer.getObjectCodeSet().getObjectCodeList()
+                syntaxAnalyzer.getObjectCodeSet().getObjectCodeList().stream()
+                        .map(ObjectCodeView::new).collect(Collectors.toList())
         );
     }
 
     @Override
     public Response run(HttpSession session) {
-        return null;
+        SyntaxAnalyzer syntaxAnalyzer = getSyntaxAnalyzerSession(session);
+        if (syntaxAnalyzer == null) {
+            return new Response(Response.SERVER_ERROR_CODE, "缓存失效");
+        }
+
+        // 开始执行
+        Interpreter interpreter = new Interpreter(syntaxAnalyzer.getObjectCodeSet().getObjectCodeList());
+        interpreter.interpreter(0, false);
+
+        // 运行时错误
+        if (interpreter.getErrorList().size() > 0) {
+            return new Response<ErrorBean>(Response.RUN_ERROR_CODE, "运行时错误", interpreter.getErrorList());
+        }
+        // 将interpreter 写入缓存
+        setInterpreterToSession(interpreter, session);
+        // 等待输入
+        if (!interpreter.isEnd()) {
+            return new Response<RunResultEntity>(Response.WAIT_INPUT_CODE, "等待输入",
+                    new RunResultEntity(interpreter.getExecuteTime(), interpreter.getOutputBuffer().toString()));
+        }
+
+        // 运行成功，清空输出缓冲区
+        return new Response<RunResultEntity>(Response.RUN_SUCCESS_CODE, "运行成功",
+                new RunResultEntity(interpreter.getExecuteTime(), interpreter.getOutputBuffer().toString()));
     }
 
     @Override
@@ -65,7 +94,34 @@ public class CodeServiceImpl implements CodeService{
 
     @Override
     public Response input(int input, HttpSession session) {
-        return null;
+        // 从缓存中获取interpreter，继续执行
+        Interpreter interpreter = getInterpreterFromSession(session);
+
+        if (interpreter == null) {
+            return new Response(Response.SERVER_ERROR_CODE, "缓存失效");
+        }
+
+        // 非法调用直接结束
+        if (interpreter.isEnd()) {
+            return new Response(Response.RUN_SUCCESS_CODE, "运行已结束");
+        }
+
+        // 输入执行
+        interpreter.interpreter(input, true);
+        // 运行时错误
+        if (interpreter.getErrorList().size() != 0) {
+            return new Response<ErrorBean>(Response.RUN_ERROR_CODE, "运行时错误", interpreter.getErrorList());
+        }
+        // 将interpreter 更新缓存
+        setInterpreterToSession(interpreter, session);
+        // 等待输入
+        if (!interpreter.isEnd()) {
+            return new Response<RunResultEntity>(Response.WAIT_INPUT_CODE, "等待输入",
+                    new RunResultEntity(interpreter.getExecuteTime(), interpreter.getOutputBuffer().toString()));
+        }
+        // 运行成功，清空输出缓冲区
+        return new Response<RunResultEntity>(Response.RUN_SUCCESS_CODE, "运行成功",
+                new RunResultEntity(interpreter.getExecuteTime(), interpreter.getOutputBuffer().toString()));
     }
 
 
