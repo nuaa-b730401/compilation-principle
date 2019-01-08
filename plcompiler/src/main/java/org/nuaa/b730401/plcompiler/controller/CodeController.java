@@ -23,24 +23,25 @@ public class CodeController {
     }
 
     @PostMapping("/compile")
-    public Response compile(String sourceCode, HttpSession session) {
-        return codeService.compile(sourceCode, session);
+    public Response compile(String sourceCode) {
+        System.out.println("source code : ");
+        System.out.println(sourceCode);
+        return codeService.compile(sourceCode);
     }
 
     @PostMapping("/run")
-    public Response run(HttpSession session) {
-        return codeService.run(session);
+    public Response run(String token) {
+        return codeService.run(token);
     }
 
     @PostMapping("/comrun")
-    public Response compileAndRun(String sourceCode, HttpSession session) {
-        return codeService.comrun(sourceCode, session);
+    public Response compileAndRun(String sourceCode) {
+        return codeService.comrun(sourceCode);
     }
 
     @PostMapping("/input")
-    public Response input(int input, HttpSession session) {
-        return codeService.input(input, session);
+    public Response input(String token, int input) {
+        System.out.println("input : " + input);
+        return codeService.input(token, input);
     }
-
-
 }

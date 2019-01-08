@@ -9,9 +9,10 @@ import org.nuaa.b730401.plcompiler.entity.ObjectCodeView;
 import org.nuaa.b730401.plcompiler.entity.Response;
 import org.nuaa.b730401.plcompiler.entity.RunResultEntity;
 import org.nuaa.b730401.plcompiler.sevice.CodeService;
+import org.nuaa.b730401.plcompiler.util.Cache;
+import org.nuaa.b730401.plcompiler.util.Token;
 import org.springframework.stereotype.Service;
 
-import javax.servlet.http.HttpSession;
 import java.util.stream.Collectors;
 
 /**
@@ -22,9 +23,11 @@ import java.util.stream.Collectors;
 @Service
 public class CodeServiceImpl implements CodeService{
     @Override
-    public Response compile(String sourceCode, HttpSession session) {
+    public Response compile(String sourceCode) {
+        String token = Token.generateToken();
+        System.out.println("current user : " + token + ", compile");
         // 新的编译清除之前缓存
-        clearSession(session);
+        clearCache(token);
         // 补换行
         sourceCode += "\n";
         // 词法分析
@@ -48,20 +51,22 @@ public class CodeServiceImpl implements CodeService{
         }
 
         // 编译成功，将编译结果写进缓存
-        setLexToSession(lexicalAnalyzer, session);
-        setSyntaxToSession(syntaxAnalyzer, session);
+        setLexToCache(token, lexicalAnalyzer);
+        setSyntaxToCache(token, syntaxAnalyzer);
         // 返回目标码
         return new Response<ObjectCodeView>(
                 Response.COMPILE_SUCCESS_CODE,
                 "编译成功",
                 syntaxAnalyzer.getObjectCodeSet().getObjectCodeList().stream()
-                        .map(ObjectCodeView::new).collect(Collectors.toList())
+                        .map(ObjectCodeView::new).collect(Collectors.toList()),
+                token
         );
     }
 
     @Override
-    public Response run(HttpSession session) {
-        SyntaxAnalyzer syntaxAnalyzer = getSyntaxAnalyzerSession(session);
+    public Response run(String token) {
+        System.out.println("current user : " + token + ", run");
+        SyntaxAnalyzer syntaxAnalyzer = getSyntaxAnalyzerCache(token);
         if (syntaxAnalyzer == null) {
             return new Response(Response.SERVER_ERROR_CODE, "缓存失效");
         }
@@ -75,7 +80,7 @@ public class CodeServiceImpl implements CodeService{
             return new Response<ErrorBean>(Response.RUN_ERROR_CODE, "运行时错误", interpreter.getErrorList());
         }
         // 将interpreter 写入缓存
-        setInterpreterToSession(interpreter, session);
+        setInterpreterToCache(token, interpreter);
         // 等待输入
         if (!interpreter.isEnd()) {
             return new Response<RunResultEntity>(Response.WAIT_INPUT_CODE, "等待输入",
@@ -88,14 +93,15 @@ public class CodeServiceImpl implements CodeService{
     }
 
     @Override
-    public Response comrun(String sourceCode, HttpSession session) {
+    public Response comrun(String sourceCode) {
         return null;
     }
 
     @Override
-    public Response input(int input, HttpSession session) {
+    public Response input(String token, int input) {
+        System.out.println("current user : " + token + ", input");
         // 从缓存中获取interpreter，继续执行
-        Interpreter interpreter = getInterpreterFromSession(session);
+        Interpreter interpreter = getInterpreterFromCache(token);
 
         if (interpreter == null) {
             return new Response(Response.SERVER_ERROR_CODE, "缓存失效");
@@ -113,7 +119,7 @@ public class CodeServiceImpl implements CodeService{
             return new Response<ErrorBean>(Response.RUN_ERROR_CODE, "运行时错误", interpreter.getErrorList());
         }
         // 将interpreter 更新缓存
-        setInterpreterToSession(interpreter, session);
+        setInterpreterToCache(token, interpreter);
         // 等待输入
         if (!interpreter.isEnd()) {
             return new Response<RunResultEntity>(Response.WAIT_INPUT_CODE, "等待输入",
@@ -125,41 +131,41 @@ public class CodeServiceImpl implements CodeService{
     }
 
 
-    private void clearSession(HttpSession session) {
-        if (session.getAttribute(session.getId() + "-lex") != null) {
-            session.removeAttribute(session.getId() + "-lex");
+    private void clearCache(String token) {
+        if (Cache.getAttribute(token + "-lex") != null) {
+            Cache.removeAttribute(token + "-lex");
         }
 
-        if (session.getAttribute(session.getId() + "-syntax") != null) {
-            session.removeAttribute(session.getId() + "-syntax");
+        if (Cache.getAttribute(token + "-syntax") != null) {
+            Cache.removeAttribute(token + "-syntax");
         }
 
-        if (session.getAttribute(session.getId() + "-interpreter") != null) {
-            session.removeAttribute(session.getId() + "-interpreter");
+        if (Cache.getAttribute(token + "-interpreter") != null) {
+            Cache.removeAttribute(token + "-interpreter");
         }
     }
 
-    private LexicalAnalyzer getLexFromSession(HttpSession session) {
-        return (LexicalAnalyzer) session.getAttribute(session.getId() + "-lex");
+    private LexicalAnalyzer getLexFromCache(String token) {
+        return (LexicalAnalyzer) Cache.getAttribute(token + "-lex");
     }
 
-    private SyntaxAnalyzer getSyntaxAnalyzerSession(HttpSession session) {
-        return (SyntaxAnalyzer) session.getAttribute(session.getId() + "-syntax");
+    private SyntaxAnalyzer getSyntaxAnalyzerCache(String token) {
+        return (SyntaxAnalyzer) Cache.getAttribute(token + "-syntax");
     }
 
-    private Interpreter getInterpreterFromSession(HttpSession session) {
-        return (Interpreter) session.getAttribute(session.getId() + "-interpreter");
+    private Interpreter getInterpreterFromCache(String token) {
+        return (Interpreter) Cache.getAttribute(token + "-interpreter");
     }
 
-    private void setLexToSession(LexicalAnalyzer lex, HttpSession session) {
-        session.setAttribute(session.getId() + "-lex", lex);
+    private void setLexToCache(String token, LexicalAnalyzer lex) {
+        Cache.setAttribute(token + "-lex", lex);
     }
 
-    private void setSyntaxToSession(SyntaxAnalyzer syntax, HttpSession session) {
-        session.setAttribute(session.getId() + "-syntax", syntax);
+    private void setSyntaxToCache(String token, SyntaxAnalyzer syntax) {
+        Cache.setAttribute(token + "-syntax", syntax);
     }
 
-    private void setInterpreterToSession(Interpreter interpreter, HttpSession session) {
-        session.setAttribute(session.getId() + "-interpreter", interpreter);
+    private void setInterpreterToCache(String token, Interpreter interpreter) {
+        Cache.setAttribute(token + "-interpreter", interpreter);
     }
 }

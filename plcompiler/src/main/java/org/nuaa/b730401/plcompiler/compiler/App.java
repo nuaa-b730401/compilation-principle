@@ -21,7 +21,7 @@ public class App {
     //
 
     public static void main(String[] args) throws IOException {
-        FileInputStream fileInputStream = new FileInputStream("E:\\tmp\\compiling\\PL-0-Compiler-master\\PL-0-Compiler-master\\testPL0\\testPL1.txt");
+        FileInputStream fileInputStream = new FileInputStream("E:\\tmp\\compiling\\PL-0-Compiler-master\\PL-0-Compiler-master\\testPL0\\testPL2.txt");
         Scanner scanner = new Scanner(fileInputStream);
         StringBuilder sourceCodeBuilder = new StringBuilder();
         while (scanner.hasNext()) {

@@ -13,31 +13,29 @@ public interface CodeService {
     /**
      * 编译并返回目标码，若出错，返回报错信息
      * @param sourceCode 输入源码
-     * @param session session
      * @return response
      */
-    Response compile(String sourceCode, HttpSession session);
+    Response compile(String sourceCode);
 
     /**
      * 运行编译缓存并返回运行结果，若出错，返回出错信息，若需要输入，返回等待状态
-     * @param session session
+     * @param token token
      * @return response
      */
-    Response run(HttpSession session);
+    Response run(String token);
 
     /**
      * 编译运行，若编译出错，返回错误，若运行出错，返回错误，否则返回编译运行结果
      * @param sourceCode 输入源码
-     * @param session session
      * @return response
      */
-    Response comrun(String sourceCode, HttpSession session);
+    Response comrun(String sourceCode);
 
     /**
      * 接受输入，并接续运行程序
+     * @param token token
      * @param input 输入
-     * @param session session
      * @return response
      */
-    Response input(int input, HttpSession session);
+    Response input(String token, int input);
 }

@@ -100,7 +100,7 @@ public class CharSequenceBuffer {
                 return new LexBean(ConstWords.LESSE, line, "-");
             }
             if (currentChar == '>') {
-                return new LexBean(ConstWords.LESS, line, "-");
+                return new LexBean(ConstWords.NEQE, line, "-");
             }
             retract();
             return new LexBean(ConstWords.LESS, line, "-");
