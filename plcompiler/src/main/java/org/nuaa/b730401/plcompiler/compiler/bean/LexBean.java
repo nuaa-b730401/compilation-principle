@@ -1,6 +1,7 @@
 package org.nuaa.b730401.plcompiler.compiler.bean;
 
 import lombok.Data;
+import org.nuaa.b730401.plcompiler.compiler.constant.ConstWords;
 
 /**
  * @Author: ToMax
@@ -17,5 +18,10 @@ public class LexBean {
         this.id = id;
         this.line = line;
         this.value = value;
+    }
+
+    @Override
+    public String toString() {
+        return ConstWords.LABEL_MAP.get(id) + "(line : " + line + " ,value = " + value + ")";
     }
 }
