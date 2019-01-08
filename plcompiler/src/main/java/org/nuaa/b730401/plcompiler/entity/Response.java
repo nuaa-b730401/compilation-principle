@@ -38,6 +38,7 @@ public class Response <T>{
 
     private int code;
     private String msg;
+    private String token;
 
     private T data;
     private List<T> array;
@@ -50,7 +51,7 @@ public class Response <T>{
         this.msg = msg;
     }
 
-    public Response(int code, String desc, T data) {
+    public Response(int code, String msg, T data) {
         this.code = code;
         this.msg = msg;
         this.data = data;
@@ -62,6 +63,13 @@ public class Response <T>{
         this.msg = msg;
         this.array = array;
         this.count = array != null ? array.size() : 0;
+    }
+    public Response(int code, String msg, List<T> array, String token) {
+        this.code = code;
+        this.msg = msg;
+        this.array = array;
+        this.count = array != null ? array.size() : 0;
+        this.token = token;
     }
 
     public Response(int code, String msg, List<T> array, long count) {

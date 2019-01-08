@@ -16,7 +16,7 @@ public class Interpreter {
     /**
      * 默认的程序最大运行时间，单位s
      */
-    private static final int DEFAULT_MAX_EXECUTE_TIME = 3600;
+    private static final int DEFAULT_MAX_EXECUTE_TIME = 36000;
     /**
      * 默认栈最大空间
      */
@@ -71,6 +71,7 @@ public class Interpreter {
     private StringBuilder outputBuffer;
 
     public Interpreter(List<ObjectCode> codeList) {
+        maxExecuteTime = DEFAULT_MAX_EXECUTE_TIME;
         dataStack = new ArrayList<>(DEFAULT_MAX_DATA_STACK_SIZE);
         for (int i = 0; i <DEFAULT_MAX_DATA_STACK_SIZE; i++) {
             dataStack.add(0);
@@ -80,10 +81,10 @@ public class Interpreter {
     }
 
     public void interpreter(int input, boolean inputStatus) {
-        outputBuffer = new StringBuilder();
         if (codeList == null || codeList.size() == 0) {
             return;
         }
+        outputBuffer = new StringBuilder();
         // 记录开始时间
         long beg = System.currentTimeMillis();
         do{
@@ -99,6 +100,8 @@ public class Interpreter {
                 }
                 // 有输入，执行读取操作
                 dataStack.set(top++, input);
+                // 读取数据后，清除标志
+                inputStatus = false;
             } else {
                 // 否则继续执行
                 instructionExecuteMap.get(ip.getOpcode()).apply();
