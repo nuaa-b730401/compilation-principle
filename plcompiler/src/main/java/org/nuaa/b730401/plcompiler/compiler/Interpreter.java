@@ -238,7 +238,7 @@ public class Interpreter {
         // CAL 指令
         put(ConstInstruction.CAL, () -> {
             dataStack.set(top, base);
-            dataStack.set(top + 1, queryBase(base, ip.getOffset()));
+            dataStack.set(top + 1, queryBase(base, ip.getDeep()));
             dataStack.set(top + 2, next);
             base = top;
             next = ip.getOffset();

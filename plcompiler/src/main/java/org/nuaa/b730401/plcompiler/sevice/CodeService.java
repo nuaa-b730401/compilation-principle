@@ -38,4 +38,12 @@ public interface CodeService {
      * @return response
      */
     Response input(String token, int input);
+
+    /**
+     * 获取符号表
+     * @param token 根据token获取
+     * @return
+     */
+    Response getSymbolTable(String token);
+
 }

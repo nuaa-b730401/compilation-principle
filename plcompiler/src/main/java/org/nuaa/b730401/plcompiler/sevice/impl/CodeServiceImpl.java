@@ -5,6 +5,7 @@ import org.nuaa.b730401.plcompiler.compiler.LexicalAnalyzer;
 import org.nuaa.b730401.plcompiler.compiler.SyntaxAnalyzer;
 import org.nuaa.b730401.plcompiler.compiler.bean.ErrorBean;
 import org.nuaa.b730401.plcompiler.compiler.bean.ObjectCode;
+import org.nuaa.b730401.plcompiler.compiler.bean.SymbolTableItem;
 import org.nuaa.b730401.plcompiler.entity.ObjectCodeView;
 import org.nuaa.b730401.plcompiler.entity.Response;
 import org.nuaa.b730401.plcompiler.entity.RunResultEntity;
@@ -130,6 +131,17 @@ public class CodeServiceImpl implements CodeService{
                 new RunResultEntity(interpreter.getExecuteTime(), interpreter.getOutputBuffer().toString()));
     }
 
+    @Override
+    public Response getSymbolTable(String token) {
+        System.out.println("current user : " + token + ", view symbol table");
+        SyntaxAnalyzer syntaxAnalyzer = getSyntaxAnalyzerCache(token);
+        return syntaxAnalyzer != null ?
+                new Response<SymbolTableItem>(
+                        Response.NORMAL_SUCCESS_CODE, "获取符号表数据成功",
+                        syntaxAnalyzer.getSymbolTable().getSymbolTable()
+                ) :
+                new Response(Response.SERVER_ERROR_CODE, "缓存失效");
+    }
 
     private void clearCache(String token) {
         if (Cache.getAttribute(token + "-lex") != null) {

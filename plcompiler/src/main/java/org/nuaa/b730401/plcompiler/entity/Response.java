@@ -12,6 +12,10 @@ import java.util.List;
 @Data
 public class Response <T>{
     /**
+     * 成功状态
+     */
+    public static final int NORMAL_SUCCESS_CODE = 0;
+    /**
      * 编译成功
      */
     public static final int COMPILE_SUCCESS_CODE = 1;

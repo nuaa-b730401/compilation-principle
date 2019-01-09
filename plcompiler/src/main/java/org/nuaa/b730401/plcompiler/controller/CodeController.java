@@ -4,8 +4,6 @@ import org.nuaa.b730401.plcompiler.entity.Response;
 import org.nuaa.b730401.plcompiler.sevice.CodeService;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpSession;
-
 /**
  * @Author: ToMax
  * @Description:
@@ -43,5 +41,10 @@ public class CodeController {
     public Response input(String token, int input) {
         System.out.println("input : " + input);
         return codeService.input(token, input);
+    }
+
+    @GetMapping("/symbol")
+    public Response symbol(String token) {
+        return codeService.getSymbolTable(token);
     }
 }
