@@ -50,6 +50,9 @@ public class Response <T>{
      */
     public static final int JUDGE_TIMEOUT_CODE = 8;
 
+    /**
+     * 堆栈溢出
+     */
     public static final int STACK_OVERFLOW_ERROR = 9;
 
     private int code;

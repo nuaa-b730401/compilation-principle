@@ -107,9 +107,9 @@ public class Interpreter {
                 instructionExecuteMap.get(ip.getOpcode()).apply();
             }
         // 若还有指令或者没有超出死循环判断时间，则继续执行指令
-        } while (next != 0 && (System.currentTimeMillis() - beg) / 1000 <= maxExecuteTime);
+        } while (next != 0 && (System.currentTimeMillis() - beg) / 1000 <= maxExecuteTime && errorList.size() == 0);
         // 超出死循环约束退出程序
-        if (next != 0) {
+        if (next != 0 && errorList.size() == 0) {
             errorList.add(new ErrorBean(0, 0, "运行超时"));
         }
         endStatus = true;
@@ -146,6 +146,10 @@ public class Interpreter {
         });
 
         put(ConstInstruction.OPR_DIV, () -> {
+            if (dataStack.get(top - 1) == 0) {
+                errorList.add(new ErrorBean(0, 0, "divide 0 error(" + dataStack.get(top - 2) + "/" + dataStack.get(top - 1) + ")"));
+                return;
+            }
             dataStack.set(top - 2, dataStack.get(top - 2) / dataStack.get(top - 1));
             top--;
         });
