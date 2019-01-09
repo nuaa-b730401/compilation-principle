@@ -40,6 +40,18 @@ public class Response <T>{
      */
     public static final int SERVER_ERROR_CODE = 6;
 
+    /**
+     * 测评错误
+     */
+    public static final int JUDGE_ERROR_CODE = 7;
+
+    /**
+     * 超出时间限制
+     */
+    public static final int JUDGE_TIMEOUT_CODE = 8;
+
+    public static final int STACK_OVERFLOW_ERROR = 9;
+
     private int code;
     private String msg;
     private String token;

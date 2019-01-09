@@ -4,6 +4,8 @@ import org.nuaa.b730401.plcompiler.entity.Response;
 import org.nuaa.b730401.plcompiler.sevice.CodeService;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+
 /**
  * @Author: ToMax
  * @Description:
@@ -46,5 +48,10 @@ public class CodeController {
     @GetMapping("/symbol")
     public Response symbol(String token) {
         return codeService.getSymbolTable(token);
+    }
+
+    @GetMapping("/judge")
+    public Response judge(int id, String token) throws IOException {
+        return codeService.judge(id, token);
     }
 }

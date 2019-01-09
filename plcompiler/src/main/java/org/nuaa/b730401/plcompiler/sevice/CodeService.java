@@ -3,6 +3,7 @@ package org.nuaa.b730401.plcompiler.sevice;
 import org.nuaa.b730401.plcompiler.entity.Response;
 
 import javax.servlet.http.HttpSession;
+import java.io.IOException;
 
 /**
  * @Author: ToMax
@@ -46,4 +47,11 @@ public interface CodeService {
      */
     Response getSymbolTable(String token);
 
+    /**
+     * 题目测评
+     * @param id 题号
+     * @param token token
+     * @return 测评结果
+     */
+    Response judge(int id, String token) throws IOException;
 }

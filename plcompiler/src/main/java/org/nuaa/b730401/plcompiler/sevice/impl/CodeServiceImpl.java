@@ -6,14 +6,23 @@ import org.nuaa.b730401.plcompiler.compiler.SyntaxAnalyzer;
 import org.nuaa.b730401.plcompiler.compiler.bean.ErrorBean;
 import org.nuaa.b730401.plcompiler.compiler.bean.ObjectCode;
 import org.nuaa.b730401.plcompiler.compiler.bean.SymbolTableItem;
+import org.nuaa.b730401.plcompiler.entity.JudgeEntity;
 import org.nuaa.b730401.plcompiler.entity.ObjectCodeView;
 import org.nuaa.b730401.plcompiler.entity.Response;
 import org.nuaa.b730401.plcompiler.entity.RunResultEntity;
 import org.nuaa.b730401.plcompiler.sevice.CodeService;
 import org.nuaa.b730401.plcompiler.util.Cache;
+import org.nuaa.b730401.plcompiler.util.JudgeUtil;
 import org.nuaa.b730401.plcompiler.util.Token;
 import org.springframework.stereotype.Service;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Scanner;
 import java.util.stream.Collectors;
 
 /**
@@ -129,6 +138,108 @@ public class CodeServiceImpl implements CodeService{
         // 运行成功，清空输出缓冲区
         return new Response<RunResultEntity>(Response.RUN_SUCCESS_CODE, "运行成功",
                 new RunResultEntity(interpreter.getExecuteTime(), interpreter.getOutputBuffer().toString()));
+    }
+
+    @Override
+    public Response judge(int id, String token) throws IOException {
+        System.out.println("current user : " + token + ", judge");
+        SyntaxAnalyzer syntaxAnalyzer = getSyntaxAnalyzerCache(token);
+        if (syntaxAnalyzer == null) {
+            return new Response(Response.SERVER_ERROR_CODE, "缓存失效");
+        }
+        List<JudgeEntity> judgeResult = new ArrayList<>();
+
+        List<String> inputData = JudgeUtil.getInput(id, "in");
+        List<String> outputData = JudgeUtil.getInput(id, "out");
+        // 开始执行
+        long beg = System.currentTimeMillis();
+        for (int i = 0; i < 10; i++) {
+            List<Integer> lineInput = Arrays.stream(inputData.get(i)
+                    .split("\\s+")).map(Integer::parseInt).collect(Collectors.toList());
+            List<Integer> lineOutput = Arrays.stream(outputData.get(i)
+                    .split("\\s+")).map(Integer::parseInt).collect(Collectors.toList());
+            int inputPointer = 0;
+
+            Interpreter interpreter = new Interpreter(syntaxAnalyzer.getObjectCodeSet().getObjectCodeList());
+            int input = 0;
+            boolean inputStatus = false;
+            StringBuilder output = new StringBuilder();
+            while (!interpreter.isEnd()) {
+                interpreter.interpreter(input, inputStatus);
+                inputStatus = false;
+                if (interpreter.getErrorList().size() > 0) {
+                    return new Response<ErrorBean>(
+                            Response.RUN_ERROR_CODE,
+                            "run error",
+                            interpreter.getErrorList()
+                    );
+                }
+
+                output.append(interpreter.getOutputBuffer().toString());
+
+                if (!interpreter.isEnd()) {
+                    if (inputPointer > lineInput.size()) {
+                        return new Response<JudgeEntity>(
+                                Response.JUDGE_ERROR_CODE,
+                                "测评错误",
+                                judgeResult
+                        );
+                    }
+                    input = lineInput.get(inputPointer++);
+                    inputStatus = true;
+                }
+            }
+            if (inputPointer < lineInput.size()) {
+                return new Response<JudgeEntity>(
+                        Response.JUDGE_ERROR_CODE,
+                        "测评错误",
+                        judgeResult
+                );
+            }
+
+            List<Integer> realOutput = Arrays.stream(output.toString()
+                    .split("\\s+")).map(Integer::parseInt).collect(Collectors.toList());
+            if (realOutput.size() != lineOutput.size()) {
+                judgeResult.add(new JudgeEntity(
+                        inputData.get(i), outputData.get(i), false, output.toString()
+                ));
+                return new Response<JudgeEntity>(
+                        Response.JUDGE_ERROR_CODE,
+                        "测评错误",
+                        judgeResult
+                );
+            }
+
+            for (int j = 0; j < realOutput.size(); j++) {
+                if (!realOutput.get(j).equals(lineOutput.get(j))) {
+                    judgeResult.add(new JudgeEntity(
+                            inputData.get(i), outputData.get(i), false, output.toString()
+                    ));
+                    return new Response<JudgeEntity>(
+                            Response.JUDGE_ERROR_CODE,
+                            "测评错误",
+                            judgeResult
+                    );
+                }
+            }
+
+            judgeResult.add(new JudgeEntity(
+                    inputData.get(i), outputData.get(i), true, output.toString()
+            ));
+        }
+        long executeTime = (System.currentTimeMillis() - beg) / 1000;
+        // 10时限
+        if (executeTime > 5) {
+            return new Response<JudgeEntity>(
+                    Response.JUDGE_TIMEOUT_CODE,
+                    "时间超限"
+            );
+        }
+        return new Response<JudgeEntity>(
+                Response.NORMAL_SUCCESS_CODE,
+                "测评正确",
+                judgeResult
+        );
     }
 
     @Override

@@ -20,7 +20,7 @@ public class Interpreter {
     /**
      * 默认栈最大空间
      */
-    private static final int DEFAULT_MAX_DATA_STACK_SIZE = 100000;
+    private static final int DEFAULT_MAX_DATA_STACK_SIZE = 10000000;
     /**
      * 运行时数据栈
      */
