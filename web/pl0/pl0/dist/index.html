@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>PL/0编译器</title>
+  <link rel="stylesheet" href="/dist/ae812fa2e793ed138d5e1a6d737f455a.css">
+  <link rel="stylesheet" href="/dist/c6b310b0387a11f82dfe5d64a2af4a79.css">
+  <link rel="stylesheet" href="/dist/794f05f37cb0bd5766e74b22c36d4e9f.css">
+  <link rel="stylesheet" href="/dist/20e49e47d0ba375c078358bffc5a68b3.css">
+  <script src="/dist/8892af8d879e06fe5e8cc1285c2f4d6a.js"></script>
+  <script src="/dist/b4b15139d6449a34be143ef880838d8b.js"></script>
+  <script src="/dist/ebdc95861f72c9b09ace2e5db1cd2f29.js"></script>
+  <script src="/dist/c2c05d1c41d99768453b15bbebee068c.js"></script>
+  <script src="/dist/1269c997ad67657d1c42127983852404.js"></script>
+  <script src="/dist/0c6f533d0da2779bdfd96cb400b7208c.js"></script>
+  <script src="/dist/fae2c46f5b1aed8e60776c6535a80476.js"></script>
+  <script src="/dist/9984aad1430386d106c2388f60724efc.js"></script>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      background: #fafafa;
+    }
+    .main {
+      display: flex;
+    }
+
+    .left-wrapper {
+      width: 620px;
+    }
+
+    .CodeMirror {
+      font-size: 14px;
+      line-height: 20px;
+      border: 1px solid #eceff1;
+      border-radius: 5px;
+    }
+
+    .btn-run {
+      float: right;
+      width: 80px;
+      margin: 10px 20px 0 0;
+    }
+
+    .execute {
+      width: 600px;
+      height: 230px;
+      border: 1px solid #eceff1;
+      background: #fff;
+    }
+  </style>
+<script src="/dist/ae812fa2e793ed138d5e1a6d737f455a.js"></script><script src="/dist/c6b310b0387a11f82dfe5d64a2af4a79.js"></script><script src="/dist/794f05f37cb0bd5766e74b22c36d4e9f.js"></script><script src="/dist/20e49e47d0ba375c078358bffc5a68b3.js"></script></head>
+<body>
+  <div class="main">
+    <div class="left-wrapper">
+      <textarea class="form-control" id="code" name="code"></textarea>
+      <button class="btn btn-secondary btn-run" onclick="handleRunReq()">Run</button>
+      <button class="btn btn-outline-secondary btn-run" onclick="postReq()">Compile</button>
+    </div>
+    <div class="right-wrapper">
+      <textarea class="form-control" id="target" name="target"></textarea>
+      <textarea class="execute" id="execute"></textarea>
+    </div>
+  </div>
+  
+</body>
+  <script src="http://libs.baidu.com/jquery/2.0.0/jquery.min.js"></script>
+  <script>
+  let url = 'http://tomax.xin:8088';
+  let isWait = false;
+
+  let codeEditor = CodeMirror.fromTextArea(document.getElementById("code"), {
+    mode: "text/x-java",
+    lineNumbers: true,
+    theme: "idea",
+    tabSize: 2,
+    lineWrapping: true,
+    foldGutter: true,
+    gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"],
+    matchBrackets: true,
+    autoCloseBrackets: true,
+    autofocus: true,
+  });
+
+  codeEditor.setSize('600px', '730px');
+
+  let targetEditor =  CodeMirror.fromTextArea(document.getElementById("target"), {
+    mode: "text/x-java",
+    // lineNumbers: true,
+    theme: "idea",
+    tabSize: 2,
+    lineWrapping: true,
+    foldGutter: true,
+    gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"],
+    matchBrackets: true,
+    autoCloseBrackets: true,
+    autofocus: true,
+  });
+
+  targetEditor.setSize('600px', '500px');
+
+  let executeEditor = CodeMirror.fromTextArea(document.getElementById("execute"), {
+    mode: "text/x-java",
+    theme: "idea",
+    tabSize: 0,
+    lineWrapping: true,
+    foldGutter: true,
+    gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"],
+    matchBrackets: true,
+    smartIndent: false,
+    autoCloseBrackets: true,
+    autofocus: true,
+  });
+
+  executeEditor.setSize('600px', '230px');
+
+  executeEditor.on('onChange', function() {
+    console.log(111)
+  })
+  function postReq() {
+    let val = codeEditor.getValue();
+    let str = '';
+    $.ajax(url + '/code/compile', {
+      type: "post",
+      data: {
+        sourceCode: val
+      },
+      success: function(res) {
+        console.log(res)
+        res.array.forEach(item => {
+          str += `${item.instruction}   ${item.offset} ${item.deep}\n`
+        });
+        
+        targetEditor.setValue(str)
+      }
+    })
+  }
+
+  function handleRunReq() {
+    $.ajax(url + '/code/run', {
+      type: "post",
+      success: function(res) {
+        console.log(res)
+      }
+    })
+  }
+
+  function postInput() {
+    let val = executeEditor.getValue();
+
+    console.log(val)
+    // $.ajax(url + '/code/input', {
+    //   type: "post",
+    //   data: {
+    //     input 
+    //   }
+    // })
+  }
+
+  function onKeyPress(event) {
+    event = event || window.event;
+    console.log(event.keyCode)
+    if (event.keyCode == 13) {
+       
+    }
+  }
+  </script>
+</html>

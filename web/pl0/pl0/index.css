@@ -1,0 +1,98 @@
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background: #fafafa;
+}
+.main {
+  display: flex;
+}
+
+.left-wrapper {
+  width: 620px;
+}
+
+.question {
+  position: relative;
+  height: 300px;
+  border: 1px solid #eceff1;
+  background: #fff;
+  font-size: 14px;
+  color: #666;
+  padding: 10px;
+}
+
+.example {
+  font-weight: bolder;
+  margin-top: 10px;
+}
+
+.code-block {
+  background: #f6f8f9;
+  color: #000;
+  padding: 5px 10px;
+  margin-top: 10px;
+}
+
+.code-title {
+  font-weight: bolder;
+  margin-right: 5px;
+}
+
+.question-page {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  transform: translateX(-50%);
+}
+
+.question-page > span {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  background: #999;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.question-item {
+  display: none;
+}
+
+.question-active {
+  display: block !important;
+}
+
+.span-active {
+  background: #3c5059 !important;
+}
+
+.CodeMirror {
+  font-size: 14px;
+  line-height: 20px;
+  border: 1px solid #eceff1;
+  border-radius: 5px;
+}
+
+.btn-run {
+  float: right;
+  min-width: 80px;
+  max-width: 200px;
+  margin: 10px 20px 0 0;
+}
+
+.execute {
+  width: 600px;
+  height: 230px;
+  border: 1px solid #eceff1;
+  background: #fff;
+}
+
+.status {
+  display: flex;
+  align-items: center;
+  height: 30px;
+  border: 1px solid #eceff1;
+  background: #fff;
+  padding: 0 10px;
+}

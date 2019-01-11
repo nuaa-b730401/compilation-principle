@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>PL/0编译器</title>
+  <link rel="stylesheet" href="codemirror-5.42.2/lib/codemirror.css">
+  <link rel="stylesheet" href="codemirror-5.42.2/addon/fold/foldgutter.css">
+  <link rel="stylesheet" href="codemirror-5.42.2/theme/idea.css">
+  <link rel="stylesheet" href="./bootstrap.min.css">
+  <link rel="stylesheet" href="./index.css">
+  <script src="http://libs.baidu.com/jquery/2.0.0/jquery.min.js"></script>
+  <script src="./bootstrap.min.js"></script>
+  <script src="codemirror-5.42.2/lib/codemirror.js"></script>
+  <script src="codemirror-5.42.2/mode/javascript/javascript.js"></script>
+  <script src="codemirror-5.42.2/mode/clike/clike.js"></script>
+  <script src="codemirror-5.42.2/mode/pascal/pascal.js"></script>
+  <script src="codemirror-5.42.2/addon/fold/foldcode.js"></script>
+  <script src="codemirror-5.42.2/addon/fold/foldgutter.js"></script>
+  <script src="codemirror-5.42.2/addon/fold/brace-fold.js"></script>
+  <script src="codemirror-5.42.2/addon/fold/comment-fold.js"></script>
+  <script src="codemirror-5.42.2/addon/edit/closebrackets.js"></script>
+</head>
+<body>
+  <div class="main">
+    <div class="left-wrapper">
+      <div class="question">
+        <div id="question0" class="question-item question-active">
+          <div class="jumbotron jumbotron-fluid">
+            <div class="container">
+              <h1 class="display-4">测试</h1>
+              <p class="lead">你现在可以测试运行自己的代码</p>
+            </div>
+          </div>
+        </div>
+        <div id="question1" class="question-item">
+          输入两个数，求他们的和
+          <div class="example">example: </div>
+          <div class="code-block">
+            <div><span class="code-title">Input: </span>1, 2</div>
+            <div><span class="code-title">Output: </span>3 1 2</div>
+          </div>
+        </div>
+        <div id="question2" class="question-item">
+          输入两个数，将他们交换
+          <div class="example">example: </div>
+          <div class="code-block">
+            <div><span class="code-title">Input: </span>2 3</div>
+            <div><span class="code-title">Output: </span>3 2</div>
+          </div>
+        </div>
+        <div class="question-page">
+          <span onclick="questionChange(0)" id="change0" class="change-span span-active"></span>
+          <span onclick="questionChange(1)" id="change1" class="change-span"></span>
+          <span onclick="questionChange(2)" id="change2" class="change-span"></span>
+        </div>
+      </div>
+      <textarea class="form-control" id="code" name="code"></textarea>
+      <button class="btn btn-secondary btn-run" onclick="handleRunReq()">Run</button>
+      <button class="btn btn-outline-secondary btn-run" onclick="postReq()">Compile</button>
+      <button class="btn btn-outline-primary btn-run" data-toggle="modal" data-target="#myModal">Open Table</button>
+      <input type="file" class="btn  btn-run" id="file"></input>
+    </div>
+    <div class="right-wrapper">
+      <textarea class="form-control" id="target" name="target"></textarea>
+      <div class="status" id="status">Not Run</div>
+      <textarea class="execute" id="execute"></textarea>
+    </div>
+  </div>
+    <!-- 模态框（Modal） -->
+  <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+            &times;
+          </button>
+        </div>
+        <div class="modal-body">
+          <table class="table table-striped table-light">
+            <thead>
+              <tr>
+                <th scope="col">type</th>
+                <th scope="col">name</th>
+                <th scope="col">level</th>
+                <th scope="col">address</th>
+                <th scope="col">value</th>
+                <th scope="col">size</th>
+              </tr>
+            </thead>
+            <tbody id="modal-tr-body">
+              <tr>
+                <th scope="row">1</th>
+                <td>Mark</td>
+                <td>Otto</td>
+                <td>@mdo</td>
+                <td>Otto</td>
+                <td>@mdo</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+  <script>
+  let url = 'http://tomax.xin:8088';
+  let isWait = false;
+  let last = '';
+  let quesId = 0;
+  let token;
+  let status = document.getElementById('status');
+  let spanList = Array.from(document.getElementsByClassName('change-span'));
+  let quesList = Array.from(document.getElementsByClassName('question-item'));
+  let trBody = document.getElementById('modal-tr-body');
+
+  let fileDom = document.getElementById('file');
+  
+  let codeEditor = CodeMirror.fromTextArea(document.getElementById("code"), {
+    mode: "pascal",
+    lineNumbers: true,
+    theme: "idea",
+    tabSize: 2,
+    lineWrapping: true,
+    foldGutter: true,
+    gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"],
+    matchBrackets: true,
+    autoCloseBrackets: true,
+    autofocus: true,
+  });
+
+  codeEditor.setSize('600px', '430px');
+  
+  let targetEditor =  CodeMirror.fromTextArea(document.getElementById("target"), {
+    mode: "/pascal",
+    theme: "idea",
+    tabSize: 2,
+    lineWrapping: true,
+    foldGutter: true,
+    gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"],
+    matchBrackets: true,
+    autoCloseBrackets: true,
+  });
+
+  targetEditor.setSize('600px', '500px');
+
+  let executeEditor = CodeMirror.fromTextArea(document.getElementById("execute"), {
+    mode: "pascal",
+    theme: "idea",
+    tabSize: 0,
+    lineWrapping: true,
+    foldGutter: true,
+    gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"],
+    matchBrackets: true,
+    smartIndent: false,
+    autoCloseBrackets: true,
+  });
+
+  executeEditor.setSize('600px', '200px');
+
+  executeEditor.on('change', function(e, b) {
+    let text = b.text;
+
+    if(text.length === 2 && !text[0] && !text[1]) {
+      postInput(e.getLine(b.from.line));
+    }
+  })
+
+  fileDom.addEventListener('change', function(e) {
+    let file = e.target.files[0];
+    let reader = new FileReader();
+    reader.readAsText(file, "UTF-8");
+    reader.onload = function(e) {
+      codeEditor.setValue(e.target.result);
+    }
+  })
+
+  function postReq() {
+    let val = codeEditor.getValue();
+    let str = '';
+    executeEditor.setValue('');
+    $.ajax(url + '/code/compile', {
+      type: "post",
+      data: {
+        sourceCode: val
+      },
+      success: function(res) {
+        token = res.token;
+        res.array.forEach(item => {
+          str += `${item.instruction}   ${item.offset} ${item.deep}\n`
+        });
+        
+        targetEditor.setValue(str);
+        generateTable();
+      }
+    })
+  }
+
+  function handleRunReq() {
+    executeEditor.setValue('');
+    if(quesId !== 0) {
+      status.innerText = `代码测评中...`;
+      $.ajax(url + '/code/judge', {
+        type: "get",
+        data: {
+          token: token,
+          id: quesId
+        },
+        success: function(res) {
+          let length;
+
+          if(res.code === 0) {
+            length = res.array.length;
+            status.innerText = `测评通过 ${length}/10`;
+            status.style = 'color: green';
+            res.array.forEach(item => {
+              addNewLine(`input: ${item.input}, output: ${item.output}, realOutput: ${item.realOutput}`, false);
+            })
+          } else if(res.code === 7) {
+            length = res.array.length;
+            if(length === 0) {
+              status.innerText = '输入错误';
+              status.style = 'color: red';
+              return;
+            } else {
+              let item = res.array[length - 1];
+
+              status.innerText = `答案错误 ${length - 1}/10`;
+              status.style = 'color: red';
+              addNewLine(`input: ${item.input}, output: ${item.output}, realOutput: ${item.realOutput}`, false);
+            }
+          } else if(res.code === 8) {
+            status.innerText = '运行超时';
+            status.style = 'color: red';
+          } else if(res.code === 6) {
+            status.innerText = '缓存失效';
+            status.style = 'color: red';
+          }
+        }
+      })
+    } else {
+      $.ajax(url + '/code/run', {
+        type: "post",
+        data: {
+          token: token
+        },
+        success: function(res) {
+          if(res.code === 2) {
+            addNewLine(res.data.output, res.code);
+          } else if(res.code === 5) {
+            status.innerText = 'Waiting...';
+          } else if(res.code === 9) {
+            status.innerText = '错误：堆栈溢出';
+            status.style = 'color: red';
+          }
+        }
+      })
+    }
+  }
+
+  function postInput(val) {
+    $.ajax(url + '/code/input', {
+      type: "post",
+      data: {
+        input: val,
+        token: token
+      },
+      success: function(res) {
+        console.log(res)
+        if(res.data.output) addNewLine(res.data.output, res.code);
+        if(!res.data.output && res.code === 2) status.innerText = 'Finished'
+      }
+    })
+  }
+
+  function addNewLine(val, code) {
+    console.log(code)
+    if(code !== false)
+      status.innerText = code === 5 ? 'Waiting...' : code === 2 ? 'Finished' : '错误：堆栈溢出';
+    let doc = executeEditor.getDoc();
+    let cursor = executeEditor.getCursor();
+    let line = doc.getLine(cursor.line);
+    let pos = {
+      line: cursor.line,
+      ch: line.length - 1
+    }
+    doc.replaceRange(val + `${code !== 2 ? '\n' : ''}`, pos);
+  }
+
+  function questionChange(id) {
+    quesId = id;
+    let spanStr = 'change' + id;
+    let quesStr = 'question' + id;
+
+    spanList.forEach(item => {
+      item.classList.contains('span-active') ? item.classList.remove('span-active') : ''
+    });
+
+    quesList.forEach(item => {
+      item.classList.contains('question-active') ? item.classList.remove('question-active') : '';
+    })
+    document.getElementById(spanStr).classList.add('span-active');
+    document.getElementById(quesStr).classList.add('question-active');
+  }
+
+  function generateTable() {
+    $.ajax(url + '/code/symbol', {
+      type: "get",
+      data: {
+        token: token
+      },
+      success: function(res) {
+        console.log(res)
+        let dom = '';
+        res.array.forEach(item => {
+          dom += 
+          `
+          <tr>
+            <th scope="row">${item.type}</th>
+            <td>${item.name}</td>
+            <td>${item.level}</td>
+            <td>${item.address}</td>
+            <td>${item.value}</td>
+            <td>${item.size}</td>
+          </tr>
+          `
+        })
+        trBody.innerHTML = dom;
+      }
+    })
+  }
+
+  </script>
+</html>
